@@ -5,7 +5,6 @@ import 'package:todo_list_app/todo_list/screens/search_items.dart';
 
 import '../../service_locator/service_locator.dart';
 import '../widgets/custom_card_todo.dart';
-//import 'package:get/get.dart';
 
 class TodoListScreen extends StatefulWidget {
   const TodoListScreen({super.key});
@@ -155,18 +154,16 @@ class _TodoListScreenState extends State<TodoListScreen> {
                           .asMap()
                           .entries
                           .map((e) {
-                        getIt<TodoListController>().isComplete.value =
-                            getIt<TodoListController>()
-                                .todoLists[e.key]
-                                .isComplete;
-                        // final tasks = getIt<TodoListController>().todoLists[e.key];
+                        final tasks =
+                            getIt<TodoListController>().todoLists[e.key];
                         return CustomCardTodo(
                           label: e.value.title,
-                          isComplete:
-                              getIt<TodoListController>().isComplete.value,
+                          isComplete: tasks.isComplete,
                           onTapDelete: () {
                             //Do on delete item in the list widget
-                            getIt<TodoListController>().onDeleteItems(e.key);
+                            //getIt<TodoListController>().onDeleteItems(e.key);
+                            getIt<TodoListController>()
+                                .onDeleteItemsFromDatabase(e.value.itemKey!);
                           },
                           onTapEdit: () {
                             // Do on edit item in the list widget
@@ -191,9 +188,6 @@ class _TodoListScreenState extends State<TodoListScreen> {
                         );
                       }).toList(),
                     ),
-
-                  // const CustomCardTodo(),
-                  //Text("et === ${getIt<TodoListController>().taskTodoValue.value}"),
                 ],
               ),
             ),

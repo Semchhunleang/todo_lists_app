@@ -19,7 +19,6 @@ class TodoListController extends GetxController {
   final validateDuplicate = false.obs;
   final indextItems = 0.obs;
   final isUpdate = false.obs;
-  final isComplete = false.obs;
   TodoClass todoModel = TodoClass();
 
   // ----- Add item to list without firebase-------
@@ -44,6 +43,23 @@ class TodoListController extends GetxController {
 
     taskTodoController.value.clear();
     update();
+  }
+
+  // ----- update item without firebase -----
+  onUpdate() {
+    // check on empty item
+    if (!validateEmpty.value) {
+      todoLists[indextItems.value].title = taskTodoValue.value;
+      isUpdate.value = false;
+      taskTodoValue.value = "";
+      taskTodoController.value.clear();
+      todoLists.refresh();
+    }
+  }
+
+  //Delete item in list
+  onDeleteItems(int index) {
+    todoLists.removeAt(index);
   }
 
   // ----- for add data to firebase ------
@@ -141,21 +157,18 @@ class TodoListController extends GetxController {
     }
   }
 
-  // ----- update item without firebase -----
-  onUpdate() {
-    // check on empty item
-    if (!validateEmpty.value) {
-      todoLists[indextItems.value].title = taskTodoValue.value;
-      isUpdate.value = false;
-      taskTodoValue.value = "";
-      taskTodoController.value.clear();
-      todoLists.refresh();
-    }
-  }
+  // ----- delete item with firebase ---
+  onDeleteItemsFromDatabase(String key) async {
+    DatabaseReference databaseReference =
+        FirebaseDatabase.instance.reference().child('todo').child(key);
 
-  //Delete item in list
-  onDeleteItems(int index) {
-    todoLists.removeAt(index);
+    // Remove the item
+    databaseReference.remove().then((_) {
+      // Fetch data after update
+      onFetchData();
+    }).catchError((error) {
+      debugPrint("Failed to remove item: $error");
+    });
   }
 
   // On search item
@@ -170,20 +183,6 @@ class TodoListController extends GetxController {
         update();
       }
     }
-  }
-
-  onSearchListExampleState() {
-    searchCon.value.addListener(() {
-      if (searchCon.value.text.isEmpty) {
-        isSearching.value = false;
-
-        update();
-      } else {
-        isSearching.value = true;
-
-        update();
-      }
-    });
   }
 
   //Validate empty item
